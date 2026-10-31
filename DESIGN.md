@@ -6,7 +6,7 @@ first, then the work.
 
 ## The idea
 
-**Quiet, warm, made by hand.** XN makes small tools that run on your own machine. The design should feel like that:
+**Quiet, warm, made by hand.** XN makes free, open source, local-first software to help you *build beyond*. The design should feel like that:
 paper, ink and one warm colour, set like a good book. Confidence comes from type and space, not effects.
 
 Three tests for anything new:
@@ -54,7 +54,7 @@ from the system (`ui-monospace`) is used only for numbers, file names and comman
 
 | Role | Size (desktop / phone) | Weight | Leading | Notes |
 | --- | --- | --- | --- | --- |
-| Display | 76 / 44px | 400 | 1.02 | Hero only. Tracking -0.02em. One italic word allowed. |
+| Display | 76 / 44px | 400 | 1.02 | Hero only. Tracking -0.02em. One italic phrase allowed, in `--clay`. |
 | Heading 1 | 52 / 36px | 400 | 1.08 | Product names. |
 | Heading 2 | 32 / 26px | 400 | 1.15 | Section titles. |
 | Lead | 22 / 19px | 400 | 1.45 | The paragraph under a heading. `--ink-2`. |
@@ -65,7 +65,7 @@ from the system (`ui-monospace`) is used only for numbers, file names and comman
 Rules:
 
 - Headings are regular weight. Size and space make them important, not bold.
-- Italic is for emphasis and for the one expressive word in a headline. Never for a whole paragraph.
+- Italic is for emphasis and for the one expressive phrase in a headline, like *build beyond*. Never for a whole paragraph.
 - Sentence case everywhere: headings, buttons, navigation.
 - Numbers in tables and labels use tabular figures.
 - No text smaller than 13px. Line length never over 72 characters.
