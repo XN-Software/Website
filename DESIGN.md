@@ -6,7 +6,7 @@ first, then the work.
 
 ## The idea
 
-**Quiet, warm, made by hand. Good code, round edges.** XN makes free, open source, local-first software to help you *build beyond*. The design should feel like that:
+**Quiet, warm, made by hand.** XN makes free, open source, local-first software to help you *build beyond*. The design should feel like that:
 paper, ink and one warm colour, set like a good book. Confidence comes from type and space, not effects.
 
 Three tests for anything new:
@@ -84,7 +84,8 @@ Rules:
   never in a gradient, never outlined, stretched or rotated.
 - Clear space around it at least half the mark's height. The lockup is never smaller than 16px tall, the mark never
   smaller than 12px.
-- Our line is **Good code, round edges.** It sits beside the mark in the footer.
+- Our line is **Free to use, open to read, yours to keep.** Free, open source and local first, in that order. It sits
+  beside the mark in the footer and closes anything we make, like a launch film. Say it exactly; don't shorten it.
 
 ## Space and layout
 
