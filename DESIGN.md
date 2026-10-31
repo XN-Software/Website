@@ -6,7 +6,7 @@ first, then the work.
 
 ## The idea
 
-**Quiet, warm, made by hand.** XN makes free, open source, local-first software to help you *build beyond*. The design should feel like that:
+**Quiet, warm, made by hand. Good code, round edges.** XN makes free, open source, local-first software to help you *build beyond*. The design should feel like that:
 paper, ink and one warm colour, set like a good book. Confidence comes from type and space, not effects.
 
 Three tests for anything new:
@@ -49,26 +49,42 @@ Rules:
 
 ## Type
 
-One family: **Newsreader**, a variable serif with optical sizes, self-hosted (`assets/fonts`, OFL). A monospace
-from the system (`ui-monospace`) is used only for numbers, file names and commands.
+Two families, each with one job.
 
-| Role | Size (desktop / phone) | Weight | Leading | Notes |
+- **Newsreader**, a variable serif with optical sizes, carries every word you read: headlines, product names,
+  paragraphs, lists. Self-hosted in `assets/fonts/newsreader` (OFL).
+- **XN One**, our own rounded geometric sans, the face of the logo, is used *a little*: labels and section numbers,
+  navigation, buttons, the footer and the video player's title. Never for a headline or a paragraph. Self-hosted in
+  `assets/fonts/xn-one` (OFL). It covers letters, digits and basic punctuation only; anything else (a middle dot,
+  a copyright sign) falls back to Newsreader on its own.
+
+| Role | Size (desktop / phone) | Face, weight | Leading | Notes |
 | --- | --- | --- | --- | --- |
-| Display | 76 / 44px | 400 | 1.02 | Hero only. Tracking -0.02em. One italic phrase allowed, in `--clay`. |
-| Heading 1 | 52 / 36px | 400 | 1.08 | Product names. |
-| Heading 2 | 32 / 26px | 400 | 1.15 | Section titles. |
-| Lead | 22 / 19px | 400 | 1.45 | The paragraph under a heading. `--ink-2`. |
-| Body | 18 / 17px | 400 | 1.6 | Measure 60 to 70 characters. |
-| Label | 13px | 500 | 1.3 | Monospace, `--ink-3`, tracking 0.04em. Section numbers and meta. |
-| Button | 16px | 500 | 1 | Serif, sentence case. |
+| Display | 76 / 44px | Newsreader 400 | 1.02 | Hero only. Tracking -0.02em. One italic phrase allowed, in `--clay`. |
+| Heading 1 | 52 / 36px | Newsreader 400 | 1.08 | Product names. |
+| Heading 2 | 32 / 26px | Newsreader 400 | 1.15 | Section titles. |
+| Lead | 22 / 19px | Newsreader 400 | 1.45 | The paragraph under a heading. `--ink-2`. |
+| Body | 18 / 17px | Newsreader 400 | 1.6 | Measure 60 to 70 characters. |
+| Label | 13px | XN One 400 | 1.3 | `--ink-3`, tracking 0.06em. Section numbers and meta. |
+| Navigation | 14px | XN One 400 | 1 | `--ink-2`, tracking 0.03em. |
+| Button | 15px | XN One 400 | 1 | Sentence case, tracking 0.02em. |
 
 Rules:
 
 - Headings are regular weight. Size and space make them important, not bold.
 - Italic is for emphasis and for the one expressive phrase in a headline, like *build beyond*. Never for a whole paragraph.
 - Sentence case everywhere: headings, buttons, navigation.
-- Numbers in tables and labels use tabular figures.
 - No text smaller than 13px. Line length never over 72 characters.
+
+## The logo
+
+- Use the files from the brand kit as they are: the lockup (the XN mark plus "Software") in the header, the mark on
+  its own where space is small, the rounded icon for favicons and app icons.
+- Black on light, white on dark. On the site it is drawn in `--ink`, so it follows the theme. Never in `--clay`,
+  never in a gradient, never outlined, stretched or rotated.
+- Clear space around it at least half the mark's height. The lockup is never smaller than 16px tall, the mark never
+  smaller than 12px.
+- Our line is **Good code, round edges.** It sits beside the mark in the footer.
 
 ## Space and layout
 
@@ -137,6 +153,7 @@ Every "Watch the video" button is a real link to the video first, so it works wi
 ## Checklist before shipping
 
 - [ ] No gradient, no glow, no Inter.
+- [ ] Newsreader for reading, XN One only for the small parts, the logo from the kit.
 - [ ] One accent per view, at most three.
 - [ ] Every text pair passes AA in light and dark.
 - [ ] Works without JavaScript (video buttons link out).
