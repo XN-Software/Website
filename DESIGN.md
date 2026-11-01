@@ -131,7 +131,8 @@ Every "Watch the video" button is a real link to the video first, so it works wi
 
 - Motion confirms something happened. It never performs.
 - Fades and short moves only: 160ms for hover, 240ms for opening, `cubic-bezier(.2, .7, .2, 1)`.
-- Nothing moves on its own, loops, or reacts to scroll position.
+- Nothing moves on its own, loops, or reacts to scroll position. One exception: the hero's "build beyond" is typed in
+  once on load, with a cursor that blinks while it types and then goes. Not repeated, and not with reduced motion.
 - With `prefers-reduced-motion`, all transitions are off.
 
 ## Writing

@@ -210,6 +210,25 @@ nav a:hover { color: var(--ink); }
 }
 .hero .label .dot { margin: 0 6px; }
 .hero h1 em { color: var(--clay); }
+/* Typed in by main.js: the ghost keeps the words' space, the typed copy
+   sits over it, and the cursor blinks while it types, then goes. */
+.hero h1 em.typing { position: relative; display: inline-block; }
+.hero h1 em.typing .ghost { visibility: hidden; }
+.hero h1 em.typing .typed { position: absolute; left: 0; top: 0; white-space: nowrap; }
+.hero h1 em .stop, .hero h1 em.typing .ghost { font-style: normal; }
+.hero h1 em .stop { color: var(--ink); }
+.hero h1 em .caret {
+  display: inline-block;
+  width: .06em;
+  height: .82em;
+  margin-left: .04em;
+  vertical-align: -.06em;
+  background: var(--clay);
+  animation: caret 1s steps(1) infinite;
+  transition: opacity 240ms var(--ease);
+}
+.hero h1 em .caret.done { opacity: 0; animation: none; }
+@keyframes caret { 50% { opacity: 0; } }
 .hero .lead { max-width: 30em; }
 .hero-links { margin-top: 32px; }
 @media (min-width: 720px) {
@@ -383,7 +402,9 @@ nav a:hover { color: var(--ink); }
   padding: 10px 10px 10px 20px;
   border-bottom: 1px solid var(--rule);
 }
-.player-title { font-family: var(--xn); font-size: 15px; letter-spacing: .03em; }
+.player-title { font-family: var(--xn); font-size: 15px; letter-spacing: .03em; margin-right: auto; }
+.on-youtube { font-size: 14px; color: var(--ink-2); margin-right: 8px; text-decoration: none; transition: color 160ms var(--ease); }
+.on-youtube:hover { color: var(--ink); }
 .close {
   width: 36px;
   height: 36px;
