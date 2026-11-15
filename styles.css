@@ -162,6 +162,8 @@ a { color: inherit; }
 }
 .btn svg { width: 14px; height: 14px; fill: currentColor; }
 .btn:hover { background: var(--clay); }
+/* the other systems' downloads, and how to open the one you got */
+.get { margin: 12px 0 0; font-size: 15px; line-height: 1.5; color: var(--ink-2); max-width: 34em; }
 .btn[aria-disabled="true"] { opacity: .5; cursor: default; pointer-events: none; }
 
 /* Header */

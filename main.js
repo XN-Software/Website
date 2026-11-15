@@ -106,3 +106,26 @@ player.addEventListener("click", (event) => {
     && event.clientY >= box.top && event.clientY <= box.bottom;
   if (!inside) closeVideo();
 });
+
+// Downloads: the button offers the visitor's own system, and the line under it the other two, with what to do once
+// it has downloaded. Without scripts the button is the Windows one and the line names macOS and Linux.
+(function downloads() {
+  const ua = navigator.userAgent, plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  const os = /Win/i.test(plat) || /Windows/.test(ua) ? "windows" : /Mac|iPhone|iPad/i.test(plat + ua) ? "macos" : /Linux|X11|CrOS/i.test(plat + ua) ? "linux" : "windows";
+  const NAMES = { windows: "Windows", macos: "macOS", linux: "Linux" };
+  const file = (app, k) => ({ windows: `assets/downloads/${app}-setup.exe`, macos: `assets/downloads/install-${app}-macos.zip`, linux: `assets/downloads/install-${app}.sh` })[k];
+  const how = (app, name) => ({
+    windows: `Open it and it installs ${name}. Windows may ask first: choose More info, then Run anyway.`,
+    macos: `Open the zip, then right-click Install ${name} and choose Open (the first time, macOS asks). It installs in Terminal.`,
+    linux: `Then run <code>bash install-${app}.sh</code> in a terminal.`,
+  });
+  for (const btn of document.querySelectorAll("[data-get]")) {
+    const app = btn.dataset.get, name = app[0].toUpperCase() + app.slice(1);
+    btn.href = file(app, os);
+    btn.querySelector("span").textContent = `Download for ${NAMES[os]}`;
+    const note = document.querySelector(`[data-get-note="${app}"]`);
+    if (!note) continue;
+    const others = Object.keys(NAMES).filter(k => k !== os).map(k => `<a class="quiet" href="${file(app, k)}" download>${NAMES[k]}</a>`);
+    note.innerHTML = `${how(app, name)[os]} Also for ${others[0]} and ${others[1]}.`;
+  }
+})();
