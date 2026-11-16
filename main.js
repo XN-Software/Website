@@ -115,9 +115,9 @@ player.addEventListener("click", (event) => {
   const NAMES = { windows: "Windows", macos: "macOS", linux: "Linux" };
   const file = (app, k) => ({ windows: `assets/downloads/${app}-setup.exe`, macos: `assets/downloads/install-${app}-macos.zip`, linux: `assets/downloads/install-${app}.sh` })[k];
   const how = (app, name) => ({
-    windows: `Open it and it installs ${name}. Windows may ask first: choose More info, then Run anyway.`,
-    macos: `Open the zip, then right-click Install ${name} and choose Open (the first time, macOS asks). It installs in Terminal.`,
-    linux: `Then run <code>bash install-${app}.sh</code> in a terminal.`,
+    windows: `Open it: a window shows the install as it happens and tells you when it is done. Windows may ask first: choose More info, then Run anyway.`,
+    macos: `Open the zip, then right-click Install ${name} and choose Open (the first time, macOS asks). A window shows the install and tells you when it is done.`,
+    linux: `Then run <code>bash install-${app}.sh</code>: a window shows the install and tells you when it is done.`,
   });
   for (const btn of document.querySelectorAll("[data-get]")) {
     const app = btn.dataset.get, name = app[0].toUpperCase() + app.slice(1);
