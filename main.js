@@ -121,11 +121,16 @@ player.addEventListener("click", (event) => {
   });
   for (const btn of document.querySelectorAll("[data-get]")) {
     const app = btn.dataset.get, name = app[0].toUpperCase() + app.slice(1);
-    btn.href = file(app, os);
-    btn.querySelector("span").textContent = `Download for ${NAMES[os]}`;
+    // the systems this app is for (data-os); a visitor on another one is offered the first of them
+    const systems = (btn.dataset.os || "windows macos linux").split(" ").filter(k => NAMES[k]);
+    const here = systems.includes(os) ? os : systems[0];
+    btn.href = file(app, here);
+    btn.querySelector("span").textContent = `Download for ${NAMES[here]}`;
     const note = document.querySelector(`[data-get-note="${app}"]`);
     if (!note) continue;
-    const others = Object.keys(NAMES).filter(k => k !== os).map(k => `<a class="quiet" href="${file(app, k)}" download>${NAMES[k]}</a>`);
-    note.innerHTML = `${how(app, name)[os]} Also for ${others[0]} and ${others[1]}.`;
+    const others = systems.filter(k => k !== here).map(k => `<a class="quiet" href="${file(app, k)}" download>${NAMES[k]}</a>`);
+    const also = others.length ? ` Also for ${others.length > 1 ? others.slice(0, -1).join(", ") + " and " + others.at(-1) : others[0]}.` : "";
+    const lead = systems.includes(os) ? how(app, name)[os] : `${name} is for ${systems.map(k => NAMES[k]).join(" and ")}, not ${NAMES[os]}.`;
+    note.innerHTML = lead + also;
   }
 })();

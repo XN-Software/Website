@@ -2,8 +2,9 @@
 # Builds the downloads. For each app: a Windows .exe (windows/), a zipped macOS app (macos/) and a Linux script
 # (linux/). Each asks first, with a box to tick for the dev version where the app has one, runs the app's own
 # installer (the same command as its README), shows what it says in a window of its own as it says it, and pops up
-# when it is done. Riptide's go in this site's assets/downloads; Flash's in flashproject.dev's (the Flash-Site
-# repository, checked out beside this one, or wherever FLASH_SITE says). Needs Go and Python 3.
+# when it is done. Riptide's and Isola's go in this site's assets/downloads (Isola's for Windows and macOS only, as
+# there is no Linux Isola); Flash's in flashproject.dev's (the Flash-Site repository, checked out beside this one, or
+# wherever FLASH_SITE says). Needs Go and Python 3.
 set -euo pipefail
 cd "$(dirname "$0")"
 FLASH_SITE="${FLASH_SITE:-../../flash-site}"
@@ -15,7 +16,11 @@ APPS=(
   "Flash^flash^$FLASH_SITE/assets/downloads^irm https://flashproject.dev/install.ps1 | iex^curl -fsSL https://flashproject.dev/install.sh | bash^& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Natuworkguy/Flash/dev/install.ps1))) -Dev^curl -fsSL https://raw.githubusercontent.com/Natuworkguy/Flash/dev/install.sh | bash -s -- --dev"
   # Riptide's releases branch has no installer yet: its downloads install the dev version, with nothing to choose
   "Riptide^riptide^../assets/downloads^& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Natuworkguy/Riptide/dev/install.ps1))) -Dev^curl -fsSL https://raw.githubusercontent.com/Natuworkguy/Riptide/dev/install.sh | bash -s -- --dev^^"
+  # Isola's installers are on its dev branch until the next release; without --dev they install the latest release
+  # (or, where it has no download for the system, build main from source), with --dev the dev branch from source
+  "Isola^isola^../assets/downloads^& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Natuworkguy/Isola/dev/install.ps1)))^curl -fsSL https://raw.githubusercontent.com/Natuworkguy/Isola/dev/install.sh | bash^& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Natuworkguy/Isola/dev/install.ps1))) -Dev^curl -fsSL https://raw.githubusercontent.com/Natuworkguy/Isola/dev/install.sh | bash -s -- --dev"
 )
+NO_LINUX="Isola"
 
 for row in "${APPS[@]}"; do
   IFS='^' read -r APP ICON OUT WIN UNIX DEVWIN DEVUNIX <<< "$row"
@@ -32,13 +37,14 @@ for row in "${APPS[@]}"; do
     -ldflags "-s -w -H windowsgui -X 'main.app=$APP' -X 'main.command=$WIN' -X 'main.devCommand=$DEVWIN'" -o "$OUT/$lower-setup.exe" ./windows
   rm -f windows/rsrc_windows_*.syso
 
-  # Linux: the script, with the app filled in
+  # Linux: the script, with the app filled in (not for an app with no Linux version)
+  if [[ " $NO_LINUX " == *" $APP "* ]]; then rm -f "$OUT/install-$lower.sh"; else
   python3 - "$APP" "$UNIX" "$DEVUNIX" "install-$lower.sh" linux/install.sh "$OUT/install-$lower.sh" <<'PY'
 import sys
 app, cmd, dev, name, src, out = sys.argv[1:]
 open(out, 'w').write(open(src).read().replace('@APP@', app).replace('@DEVCOMMAND@', dev).replace('@COMMAND@', cmd).replace('@FILE@', name))
 PY
-  chmod +x "$OUT/install-$lower.sh"
+  chmod +x "$OUT/install-$lower.sh"; fi
 
   # macOS: "Install <App>.app", zipped so it keeps its permissions
   python3 - "$APP" "$ICON" "$UNIX" "$DEVUNIX" "$OUT/install-$lower-macos.zip" <<'PY'

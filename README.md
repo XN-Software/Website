@@ -13,7 +13,8 @@ python3 -m http.server 8000
 - `main.js`: the video player, and the download buttons. Each "Watch the video" button is a plain link to the video;
   with scripts on, it opens in a player on the page instead, loading the video only then. Each Download button offers
   the visitor's own system, and the line under it the other two.
-- `assets/downloads`: Riptide's downloads: a Windows `.exe`, a zipped macOS app and a Linux script. Each runs
+- `assets/downloads`: Riptide's and Isola's downloads: a Windows `.exe`, a zipped macOS app and (Riptide only, as
+  Isola has no Linux version) a Linux script. Each runs
   Riptide's own installer, shows what it says in a window of its own as it says it (Windows Forms, Cocoa, or zenity
   or Tk on Linux), and pops up when it is done. Flash's are on flashproject.dev, where its Download button goes. The
   sources are in `installers/`; `installers/build.sh` (Go and Python 3) builds both apps' downloads, writing Flash's
