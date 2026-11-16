@@ -52,13 +52,15 @@ func main() {
 	self, _ := os.Executable()
 
 	// the window first, so it is up before the installer has said anything
-	args := []string{"-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-WindowStyle", "Hidden",
+	// no console for it (CREATE_NO_WINDOW), but not started hidden either: Windows applies a hidden start to the first
+	// window the process opens, which would be the installer's own
+	args := []string{"-NoProfile", "-ExecutionPolicy", "Bypass", "-STA",
 		"-File", script, "-App", app, "-Log", logPath, "-Status", statusPath, "-Choice", choicePath, "-Icon", self}
 	if devCommand != "" {
 		args = append(args, "-CanDev")
 	}
 	gui := exec.Command("powershell.exe", args...)
-	hidden(gui)
+	gui.SysProcAttr = &syscall.SysProcAttr{CreationFlags: noWindow}
 	if err := gui.Start(); err != nil {
 		os.Exit(1)
 	}

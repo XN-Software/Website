@@ -10,6 +10,8 @@ Add-Type -AssemblyName System.Drawing
 
 $paper = [System.Drawing.Color]::FromArgb(244, 241, 234)
 $form = New-Object System.Windows.Forms.Form
+$form.AutoScaleMode = 'Dpi'
+$form.MinimumSize = New-Object System.Drawing.Size(560, 360)
 $form.Text = "Install $App"
 $form.Width = 780
 $form.Height = 500
@@ -45,22 +47,32 @@ $dev.Location = New-Object System.Drawing.Point(30, 140)
 $dev.Visible = [bool]$CanDev
 $ask.Controls.Add($dev)
 
+# the buttons in a strip along the bottom, laid out right to left: anchored to a panel's corner they were measured
+# against its small starting size, so once it filled the window they sat off its edge
+$bar = New-Object System.Windows.Forms.FlowLayoutPanel
+$bar.Dock = 'Bottom'
+$bar.FlowDirection = 'RightToLeft'
+$bar.AutoSize = $true
+$bar.AutoSizeMode = 'GrowAndShrink'
+$bar.WrapContents = $false
+$bar.Padding = New-Object System.Windows.Forms.Padding(0, 8, 0, 0)
+
 $go = New-Object System.Windows.Forms.Button
 $go.Text = "Install"
 $go.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
-$go.Size = New-Object System.Drawing.Size(120, 36)
-$go.Anchor = 'Bottom, Right'
-$go.Location = New-Object System.Drawing.Point(610, 390)
-$ask.Controls.Add($go)
+$go.AutoSize = $true
+$go.MinimumSize = New-Object System.Drawing.Size(120, 36)
+$bar.Controls.Add($go)
 $form.AcceptButton = $go
 
 $no = New-Object System.Windows.Forms.Button
 $no.Text = "Cancel"
 $no.Font = New-Object System.Drawing.Font('Segoe UI', 10)
-$no.Size = New-Object System.Drawing.Size(100, 36)
-$no.Anchor = 'Bottom, Right'
-$no.Location = New-Object System.Drawing.Point(498, 390)
-$ask.Controls.Add($no)
+$no.AutoSize = $true
+$no.MinimumSize = New-Object System.Drawing.Size(100, 36)
+$bar.Controls.Add($no)
+$form.CancelButton = $no
+$ask.Controls.Add($bar)
 
 # ----- then: the log -----
 $head = New-Object System.Windows.Forms.Label
@@ -144,5 +156,12 @@ $go.Add_Click({
 })
 $no.Add_Click({ $form.Close() })
 $form.Add_FormClosing({ if (-not $script:chosen) { try { Set-Content -LiteralPath $Choice -Value 'cancel' -Encoding Ascii } catch {} } })
-$form.Add_Shown({ $form.Activate(); $go.Focus() })
+$form.Add_Shown({
+  # shown, in front, and focused, whatever the process that started this was started with
+  $form.WindowState = 'Normal'
+  $form.TopMost = $true
+  $form.Activate()
+  $form.TopMost = $false
+  $go.Focus()
+})
 [void]$form.ShowDialog()
