@@ -1,9 +1,9 @@
 //go:build windows
 
-// The Windows download for an XN app. It runs the app's own installer (the same command as its README) with no
-// console window, writes what the installer says to a log, and shows that log as it grows in a window of its own
-// (window.ps1, drawn with Windows Forms through PowerShell, which every Windows has). When the installer finishes
-// the window says so in a popup. The app's name, command and icon are set at build time (see ../build.sh).
+// The Windows download for an XN app. Its window (window.ps1, drawn with Windows Forms through PowerShell, which every
+// Windows has) asks first, with a box to tick for the dev version where the app has one; then this runs the app's own
+// installer (the same command as its README) with no console window, writes what it says to a log, and the window
+// shows the log as it grows and pops up when it is done. Name, commands and icon are set at build time (../build.sh).
 package main
 
 import (
@@ -16,11 +16,13 @@ import (
 	"regexp"
 	"strings"
 	"syscall"
+	"time"
 )
 
 var (
-	app     = "Flash"
-	command = ""
+	app        = "Flash"
+	command    = ""
+	devCommand = "" // the dev version's install command; empty when the app has no separate dev install
 )
 
 //go:embed window.ps1
@@ -38,6 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 	logPath, statusPath, script := filepath.Join(dir, "install.log"), filepath.Join(dir, "status"), filepath.Join(dir, "window.ps1")
+	choicePath := filepath.Join(dir, "choice")
 	logFile, err := os.Create(logPath)
 	if err != nil {
 		os.Exit(1)
@@ -49,11 +52,36 @@ func main() {
 	self, _ := os.Executable()
 
 	// the window first, so it is up before the installer has said anything
-	gui := exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-WindowStyle", "Hidden",
-		"-File", script, "-App", app, "-Log", logPath, "-Status", statusPath, "-Icon", self)
+	args := []string{"-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-WindowStyle", "Hidden",
+		"-File", script, "-App", app, "-Log", logPath, "-Status", statusPath, "-Choice", choicePath, "-Icon", self}
+	if devCommand != "" {
+		args = append(args, "-CanDev")
+	}
+	gui := exec.Command("powershell.exe", args...)
 	hidden(gui)
 	if err := gui.Start(); err != nil {
-		fmt.Fprintf(logFile, "Could not open the window: %v\n", err)
+		os.Exit(1)
+	}
+	// wait for Install (or for the window to close without it)
+	closed := make(chan struct{})
+	go func() { gui.Wait(); close(closed) }()
+	choice := ""
+	for choice == "" {
+		select {
+		case <-closed:
+			os.Exit(0)
+		case <-time.After(200 * time.Millisecond):
+			if b, err := os.ReadFile(choicePath); err == nil {
+				choice = strings.TrimSpace(string(b))
+			}
+		}
+	}
+	if choice == "cancel" {
+		<-closed
+		os.Exit(0)
+	}
+	if choice == "dev" && devCommand != "" {
+		command = devCommand
 	}
 
 	fmt.Fprintf(logFile, "Installing %s. Running its installer:\r\n  %s\r\n\r\n", app, command)
@@ -86,7 +114,5 @@ func main() {
 	}
 	logFile.Close()
 	os.WriteFile(statusPath, []byte(fmt.Sprint(code)), 0o644)
-	if gui.Process != nil {
-		gui.Wait()
-	}
+	<-closed
 }

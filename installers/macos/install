@@ -1,19 +1,26 @@
 #!/bin/bash
-# The macOS download for an XN app ("Install <App>.app"): runs the app's own installer (the same command as its
-# README), writes what it says to a log, and shows the log as it grows in a window of its own (window.js, drawn with
-# Cocoa through the scripting built into macOS). When it finishes the window says so in a popup.
-# @APP@ and @COMMAND@ are filled in by ../build.sh.
+# The macOS download for an XN app ("Install <App>.app"). Its window (window.js, drawn with Cocoa through the
+# scripting built into macOS) asks first, with a box to tick for the dev version where the app has one; then this
+# runs the app's own installer (the same command as its README), writes what it says to a log, and the window shows
+# the log as it grows and pops up when it is done. The name and commands below are filled in by ../build.sh.
 APP='@APP@'
 COMMAND='@COMMAND@'
+DEVCOMMAND='@DEVCOMMAND@'
 here="$(cd "$(dirname "$0")/../Resources" && pwd)"
 dir="$(mktemp -d -t xn-install)"
-log="$dir/install.log"; status="$dir/status"
-printf 'Installing %s. Running its installer:\n  %s\n\n' "$APP" "$COMMAND" > "$log"
+log="$dir/install.log"; status="$dir/status"; choice="$dir/choice"
+: > "$log"
+/usr/bin/osascript -l JavaScript "$here/window.js" "$APP" "$log" "$status" "$choice" "$([ -n "$DEVCOMMAND" ] && echo 1 || echo 0)" &
+window=$!
+# wait for Install, or for the window to close without it
+until [ -s "$choice" ]; do kill -0 "$window" 2>/dev/null || exit 0; sleep 0.2; done
+case "$(cat "$choice")" in
+  cancel) wait "$window"; exit 0 ;;
+  dev) [ -n "$DEVCOMMAND" ] && COMMAND="$DEVCOMMAND" ;;
+esac
+printf 'Installing %s. Running its installer:\n  %s\n\n' "$APP" "$COMMAND" >> "$log"
 # an app opened from Finder has a bare PATH: add where Homebrew and the installers' own tools live
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
-(
-  /bin/bash -lc "$COMMAND" < /dev/null 2>&1 | /usr/bin/perl -pe '$|=1; s/\e\[[0-9;?]*[ -\/]*[@-~]//g; s/^.*\r(?=.)//' >> "$log"
-  echo "${PIPESTATUS[0]}" > "$status"
-) &
-/usr/bin/osascript -l JavaScript "$here/window.js" "$APP" "$log" "$status"
-wait
+/bin/bash -lc "$COMMAND" < /dev/null 2>&1 | /usr/bin/perl -pe '$|=1; s/\e\[[0-9;?]*[ -\/]*[@-~]//g; s/^.*\r(?=.)//' >> "$log"
+echo "${PIPESTATUS[0]}" > "$status"
+wait "$window"

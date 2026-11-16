@@ -1,11 +1,51 @@
 #!/usr/bin/env bash
-# Installs Riptide: runs its installer (the same command as its README) and shows what it says in a window of its own,
-# then a popup when it is done. The window is zenity's or, without it, Python's Tk; with neither (or no screen) it
-# shows in this terminal. Run it with: bash install-riptide.sh
+# Installs Riptide: asks first (with a box to tick for the dev version, where there is one), then runs its installer
+# (the same command as its README) and shows what it says in a window of its own, then a popup when it is done. The
+# window is zenity's or, without it, Python's Tk; with neither (or no screen) it is this terminal.
+# Run it with: bash install-riptide.sh   (add --dev for the dev version without being asked)
 APP='Riptide'
 COMMAND='curl -fsSL https://raw.githubusercontent.com/Natuworkguy/Riptide/dev/install.sh | bash -s -- --dev'
+DEVCOMMAND=''
+DEVTEXT="Install the dev version: the newest changes, before they are released, so less tested."
 dir="$(mktemp -d)"; log="$dir/install.log"; status="$dir/status"
-printf 'Installing %s. Running its installer:\n  %s\n\n' "$APP" "$COMMAND" > "$log"
+screen=""; [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && screen=1
+tk=""; command -v python3 >/dev/null 2>&1 && python3 -c 'import tkinter' 2>/dev/null && tk=1
+
+# ----- what to install -----
+which=stable
+if [ "${1:-}" = "--dev" ] && [ -n "$DEVCOMMAND" ]; then which=dev
+elif [ -n "$screen" ] && command -v zenity >/dev/null 2>&1; then
+  if [ -n "$DEVCOMMAND" ]; then
+    picked=$(zenity --list --checklist --title="Install $APP" --text="This downloads $APP and installs it for you. It can take a few minutes, and a window shows each step." \
+      --column="" --column="" --hide-header --ok-label=Install --cancel-label=Cancel --width=560 --height=260 FALSE "$DEVTEXT" 2>/dev/null) || exit 0
+    [ -n "$picked" ] && which=dev
+  else
+    zenity --question --title="Install $APP" --text="This downloads $APP and installs it for you. It can take a few minutes, and a window shows each step." --ok-label=Install --cancel-label=Cancel --width=420 2>/dev/null || exit 0
+  fi
+elif [ -n "$screen" ] && [ -n "$tk" ]; then
+  which=$(python3 - "$APP" "$DEVTEXT" "$([ -n "$DEVCOMMAND" ] && echo 1)" <<'PY'
+import sys, tkinter as tk
+app, devtext, can_dev = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+root = tk.Tk(); root.title(f"Install {app}"); root.geometry("640x260"); out = ["cancel"]
+tk.Label(root, text=f"Install {app}", font=("sans", 20, "bold"), anchor="w").pack(fill="x", padx=24, pady=(24, 6))
+tk.Label(root, text=f"This downloads {app} and installs it for you. It can take a few minutes, and a window shows each step.", wraplength=590, justify="left", anchor="w").pack(fill="x", padx=24)
+dev = tk.BooleanVar(value=False)
+if can_dev: tk.Checkbutton(root, text=devtext, variable=dev, anchor="w").pack(fill="x", padx=20, pady=12)
+row = tk.Frame(root); row.pack(side="bottom", anchor="e", padx=20, pady=16)
+def go(): out[0] = "dev" if dev.get() else "stable"; root.destroy()
+tk.Button(row, text="Cancel", command=root.destroy).pack(side="left", padx=6)
+tk.Button(row, text="Install", default="active", command=go).pack(side="left")
+root.bind("<Return>", lambda e: go()); root.mainloop(); print(out[0])
+PY
+)
+  [ "$which" = cancel ] && exit 0
+elif [ -n "$DEVCOMMAND" ] && [ -t 0 ]; then
+  read -r -p "Install the dev version of $APP (the newest changes, less tested)? [y/N] " yes
+  case "$yes" in [yY]*) which=dev ;; esac
+fi
+[ "$which" = dev ] && COMMAND="$DEVCOMMAND"
+
+printf 'Installing %s%s. Running its installer:\n  %s\n\n' "$([ "$which" = dev ] && echo 'the dev version of ')" "$APP" "$COMMAND" > "$log"
 (
   bash -c "$COMMAND" < /dev/null 2>&1 | sed -u -e 's/\x1b\[[0-9;?]*[ -/]*[@-~]//g' -e 's/^.*\r\(.\)/\1/' >> "$log"
   echo "${PIPESTATUS[0]}" > "$status"
@@ -14,7 +54,6 @@ worker=$!
 code() { cat "$status" 2>/dev/null || echo 1; }
 done_text="$APP is installed. Open it from your applications menu, or run: $(echo "$APP" | tr '[:upper:]' '[:lower:]')"
 fail_text="The installer stopped before $APP was installed. What it said is in the window, and in $log"
-screen=""; [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && screen=1
 
 if [ -n "$screen" ] && command -v zenity >/dev/null 2>&1; then
   # the log as it grows, until the installer is done; then the popup
@@ -22,7 +61,7 @@ if [ -n "$screen" ] && command -v zenity >/dev/null 2>&1; then
   wait "$worker"
   if [ "$(code)" = 0 ]; then zenity --info --title="Done" --text="$done_text" --width=380 2>/dev/null
   else zenity --warning --title="Not installed" --text="$fail_text" --width=380 2>/dev/null; fi
-elif [ -n "$screen" ] && command -v python3 >/dev/null 2>&1 && python3 -c 'import tkinter' 2>/dev/null; then
+elif [ -n "$screen" ] && [ -n "$tk" ]; then
   python3 - "$APP" "$log" "$status" "$done_text" "$fail_text" <<'PY'
 import os, sys, tkinter as tk
 from tkinter import messagebox
