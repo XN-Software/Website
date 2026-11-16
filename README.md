@@ -20,7 +20,12 @@ python3 -m http.server 8000
   sources are in `installers/`; `installers/build.sh` (Go and Python 3) builds both apps' downloads, writing Flash's
   into the Flash-Site repository checked out beside this one. Where an app has a dev version, the installer asks.
 - `assets/fonts`: Newsreader and XN One, self-hosted, each with its SIL Open Font License.
-- `assets/brand`, `favicon.ico`: the icons from the XN Software brand kit.
+- `font/`: XN One's page: the letters, the weights, a type tester, examples in use, and its download
+  (`assets/downloads/xn-one.zip`: TTF and WOFF2 with the license).
+- `brand/`: the brand kit's page: the logo files, colours, type and rules, and the whole kit as
+  `assets/downloads/xn-brand-kit.zip`.
+- `assets/brand`, `favicon.ico`: the brand kit's files: the lockup and the mark in black and white (SVG and PNG), and
+  the icon, dark and light.
 - `DESIGN.md`: the design rules. Read them before changing anything you can see.
 
 It is ready for GitHub Pages as it is: publish from the root of the default branch.
